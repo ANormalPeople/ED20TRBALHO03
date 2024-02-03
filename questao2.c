@@ -29,7 +29,6 @@ Nodo* novoNodo(int dest, float confiabilidade) {
     return novo;
 }
 
-
 lista_de_adjacencia* novaListaAdj(int nvert) {
     lista_de_adjacencia* grafo = (lista_de_adjacencia*)malloc(sizeof(lista_de_adjacencia));
     grafo->nvert = nvert;
@@ -71,7 +70,7 @@ void imprimirCaminho(float dist[], int pai[], int vert_final) {
     printf(" %.2f \t\t\t\t", dist[vert_final]*100);
     int j = vert_final;
     while (j != -1) {
-        printf("%d ", j);
+        printf("%d <- ", j);
         j = pai[j];
     }
     printf("\n");

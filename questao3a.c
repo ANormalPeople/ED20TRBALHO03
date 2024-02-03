@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-
-#define TAMANHO_VETOR_DESTINO 101 // Defina o tamanho do vetor destino
-#define TAMANHO_VETOR_DESTINO2 150 // Defina o tamanho do vetor destino
+// tamanhos utilizados
+#define TAMANHO_VETOR_DESTINO 101 
+#define TAMANHO_VETOR_DESTINO2 150 
 #define Total_fun 1000
 
 typedef struct Funcionario Funcionario;
@@ -54,7 +54,7 @@ char* extracao(char *matricula) {
     }
     return matricula;
 }
-//////////////////////hash////////////////////////
+//////////////////////////////////////////////
 
 ////////////////////populando////////////////////
 
@@ -71,79 +71,84 @@ void populando_funcionarios(Funcionario *funcionarios) {
         gerar_matricula(funcionarios[i].Matricula);
         sprintf(funcionarios[i].Nome, "Funcionario%d", i);
         sprintf(funcionarios[i].Funcao, "Cargo%d", i);
-        funcionarios[i].Salario = 5000;
+        funcionarios[i].Salario = 1000;
     }
 }
 ///////////////////////////////////////////////////////
 
-int hashingA(char *matricula) {
+int hashingA(char *matricula,int tamanhoVetor) {
     char posi[6];
     strcpy(posi, matricula);
     rotacao(posi);
     extracao(posi);
-    return ((posi[0] - '0') * 100 + (posi[1] - '0') * 10 + (posi[2] - '0')) % TAMANHO_VETOR_DESTINO;
+    return ((posi[0] - '0') * 100 + (posi[1] - '0') * 10 + (posi[2] - '0')) % tamanhoVetor;
 }
 
-void collisionHandlingA(Funcionario *func, Hash *vetorDestinoA, int tamanhoVetor) {
-    int jump = 7 + hashingA(func->Matricula);
-
-    while (vetorDestinoA[jump].funcionarios != NULL && jump <= tamanhoVetor)
-        jump += 7;
+void collisionHandlingA(Funcionario *funcionario, Hash *vetorDestino, int tamanhoVetor) {
+    int hashValue = hashingA(funcionario->Matricula,tamanhoVetor);
+    int primeiraMatriculaDigit = funcionario->Matricula[0] - '0';
     
-    if(jump <= tamanhoVetor)
-        vetorDestinoA[jump].funcionarios = func;
+    while (vetorDestino[hashValue].funcionarios != NULL && hashValue < tamanhoVetor)
+        hashValue += primeiraMatriculaDigit;
+    if(hashValue < tamanhoVetor)
+        vetorDestino[hashValue].funcionarios = funcionario;
     else
-        vetorDestinoA[0].funcionarios = func;
+        vetorDestino[0].funcionarios = funcionario;
 }
 
-
-// unsigned int hashingB(char *matricula) {
-//     // Implemente a função de hashing conforme especificado no item (b)
-// }
-
-// unsigned int collisionHandlingB(unsigned int hashValue) {
-//     // Implemente o tratamento de colisões conforme especificado no item (b)
-// }
+void limpar(Hash *vetorDestino, int tamanho) {
+    for (int i = 0; i < tamanho; i++) {
+        vetorDestino[i].funcionarios = NULL;
+        vetorDestino[i].quant_coli = 0;
+    }
+}
 
 int main() {
     srand(time(NULL));
-    Hash *vetorDestinoA = (Hash *)malloc(TAMANHO_VETOR_DESTINO * sizeof(Hash));
-    Hash *vetorDestinoB = (Hash *)malloc(TAMANHO_VETOR_DESTINO2 * sizeof(Hash));
+    int esc;
 
-    // Inicialize os dados da base de funcionários
-    Funcionario *funcionarios = (Funcionario *)malloc(Total_fun * sizeof(Funcionario));
-    populando_funcionarios(funcionarios);
+    while (1) {
+        Hash *vetorDestino;
 
-    // Inicialize a estrutura Hash no vetorDestinoA
-    for (int i = 0; i < TAMANHO_VETOR_DESTINO; i++) {
-        vetorDestinoA[i].funcionarios = NULL;
-        vetorDestinoA[i].quant_coli = 0;
+        printf("1 para o vetor com 101\n2 para o vetor com 150\n-1 para sair\n");
+        scanf("%d", &esc);
+
+        // Inicialize os dados da base de funcionários
+        Funcionario *funcionarios = (Funcionario *)malloc(Total_fun * sizeof(Funcionario));
+        populando_funcionarios(funcionarios);
+
+        int tamanhoVetor = 0;
+        if (esc == 1) {
+            vetorDestino = (Hash *)malloc(TAMANHO_VETOR_DESTINO * sizeof(Hash));
+            tamanhoVetor = TAMANHO_VETOR_DESTINO;
+        } else if (esc == 2) {
+            vetorDestino = (Hash *)malloc(TAMANHO_VETOR_DESTINO2 * sizeof(Hash));
+            tamanhoVetor = TAMANHO_VETOR_DESTINO2;
+        } else if (esc == -1) {
+            return 0;
+        } else {
+            printf("Escolha uma opcao valida!\n");
+            continue;
+        }
+        limpar(vetorDestino,tamanhoVetor);
+        // Inserção nos vetores de destino usando a função de hashing A
+        for (int i = 0; i < Total_fun; i++) {
+            int hashValue = hashingA(funcionarios[i].Matricula, tamanhoVetor);
+            // Tratamento de colisões
+            if (vetorDestino[hashValue].funcionarios != NULL) {
+                collisionHandlingA(&funcionarios[i], vetorDestino, tamanhoVetor);
+                vetorDestino[hashValue].quant_coli++;
+            } else {
+                vetorDestino[hashValue].funcionarios = &funcionarios[i];
+            }
+        }
+
+        for (int i = 0; i < tamanhoVetor; i++) 
+            printf("%d-%d\n", i, vetorDestino[i].quant_coli);
+
+        // Liberação de memória
+        free(vetorDestino);
+        free(funcionarios);
     }
-
-    // Inserção nos vetores de destino usando a função de hashing A
-    for (int i = 0; i < Total_fun; i++) {
-        int hashValue = hashingA(funcionarios[i].Matricula);
-        // printf("%d %d \n",i,hashValue);
-        // Tratamento de colisões
-        if(vetorDestinoA[hashValue].funcionarios != NULL){
-            collisionHandlingA(&funcionarios[i], vetorDestinoA, TAMANHO_VETOR_DESTINO);   
-            vetorDestinoA[hashValue].quant_coli++;         
-        }else
-            vetorDestinoA[hashValue].funcionarios = &funcionarios[i];
-    }
-
-    for (int i = 0; i < TAMANHO_VETOR_DESTINO; i++) {
-        printf("%d-%d\n",i,vetorDestinoA[i].quant_coli);
-    }
-
-    // Restante do código...
-
-    // Liberação de memória
-    free(vetorDestinoA);
-    free(vetorDestinoB);
-    free(funcionarios);
-
     return 0;
 }
-
-
