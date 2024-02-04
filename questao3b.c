@@ -79,6 +79,7 @@ void limpar(Hash *vetorDestino, int tamanho) {
 }
 
 int main() {
+    clock_t inicio, fim;
     srand(time(NULL));
     int esc;
 
@@ -106,6 +107,8 @@ int main() {
             continue;
         }
         limpar(vetorDestino,tamanhoVetor);
+
+        inicio = clock();
         // Inserção nos vetores de destino usando a função de hashing B
         for (int i = 0; i < Total_fun; i++) {
             int hashValue = hashingB(funcionarios[i].Matricula, tamanhoVetor);
@@ -117,10 +120,15 @@ int main() {
                 vetorDestino[hashValue].funcionarios = &funcionarios[i];
             
         }
+        fim = clock();
+        double tempo_execucao = ((double)(fim - inicio)) / CLOCKS_PER_SEC;
+
+
 
         for (int i = 0; i < tamanhoVetor; i++) 
             printf("%d-%d\n", i, vetorDestino[i].quant_coli);
-        
+                
+        printf("Tempo de execucao: %lf segundos\n", tempo_execucao);
 
         // Liberação de memória
         free(vetorDestino);

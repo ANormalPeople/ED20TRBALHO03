@@ -64,7 +64,7 @@ void liberarGrafo(lista_de_adjacencia* grafo) {
 }
 
 
-// Função para imprimir o caminho mínimo de um vértice inicial para o vértice final
+// Função para imprimir o caminho adequado de um vértice inicial para o vértice final
 void imprimirCaminho(float dist[], int pai[], int vert_final) {
     printf(" Chance de dar certo \t\t Caminho\n");
     printf(" %.2f \t\t\t\t", dist[vert_final]*100);
@@ -77,8 +77,8 @@ void imprimirCaminho(float dist[], int pai[], int vert_final) {
 }
 
 
-// Função auxiliar para encontrar o vértice com a menor distância no conjunto de vértices não processados
-int encontrarMenorDistancia(float dist[], int processado[], int nvert) {
+// Função auxiliar para encontrar o vértice com melhor confiabilidade no conjunto de vértices não processados
+int encontrarConfiabilidade(float dist[], int processado[], int nvert) {
     float max_conf = -1.0;
     int max_index = -1;
 
@@ -107,7 +107,7 @@ void dijkstra(lista_de_adjacencia* g, int vert_inicial, int vert_final) {
     dist[vert_inicial] = 1.0;  
 
     for (int count = 0; count < g->nvert - 1; count++) {
-        int u = encontrarMenorDistancia(dist, processado, g->nvert);
+        int u = encontrarConfiabilidade(dist, processado, g->nvert);
         processado[u] = 1;
 
         for (Nodo* aux = g->adj[u]; aux; aux = aux->prox) {

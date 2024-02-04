@@ -84,7 +84,7 @@ int hashingA(char *matricula,int tamanhoVetor) {
     return ((posi[0] - '0') * 100 + (posi[1] - '0') * 10 + (posi[2] - '0')) % tamanhoVetor;
 }
 
-void collisionHandlingA(Funcionario *funcionario, Hash *vetorDestino, int tamanhoVetor) {
+void ColisaoA(Funcionario *funcionario, Hash *vetorDestino, int tamanhoVetor) {
     int hashValue = hashingA(funcionario->Matricula,tamanhoVetor);
     int primeiraMatriculaDigit = funcionario->Matricula[0] - '0';
     
@@ -104,6 +104,7 @@ void limpar(Hash *vetorDestino, int tamanho) {
 }
 
 int main() {
+    clock_t inicio, fim;
     srand(time(NULL));
     int esc;
 
@@ -132,19 +133,33 @@ int main() {
         }
         limpar(vetorDestino,tamanhoVetor);
         // Inserção nos vetores de destino usando a função de hashing A
+
+
+
+        //medicao do tempo
+        inicio = clock();
         for (int i = 0; i < Total_fun; i++) {
             int hashValue = hashingA(funcionarios[i].Matricula, tamanhoVetor);
             // Tratamento de colisões
             if (vetorDestino[hashValue].funcionarios != NULL) {
-                collisionHandlingA(&funcionarios[i], vetorDestino, tamanhoVetor);
+                ColisaoA(&funcionarios[i], vetorDestino, tamanhoVetor);
                 vetorDestino[hashValue].quant_coli++;
             } else {
                 vetorDestino[hashValue].funcionarios = &funcionarios[i];
             }
         }
+        fim = clock();
+
+
+        double tempo_execucao = ((double)(fim - inicio)) / CLOCKS_PER_SEC;
+        
+
+
 
         for (int i = 0; i < tamanhoVetor; i++) 
             printf("%d-%d\n", i, vetorDestino[i].quant_coli);
+
+        printf("Tempo de execucao: %lf segundos\n", tempo_execucao);
 
         // Liberação de memória
         free(vetorDestino);
